@@ -15,7 +15,22 @@
 <script>
 
 $(document).ready(function () {
-    var pageLogger = floe.speechRecognitionPageLogger(".floe-speechLog");
+    // var pageLogger = floe.speechRecognitionPageLogger(".floe-speechLog");
+    var speechController = floe.speechRecognitionEventController({
+        events: {
+            onPlaySpoken: null
+        },
+        speechToEvents: {
+            "play": "{that}.events.onPlaySpoken"
+        },
+        listeners: {
+            "onPlaySpoken.log": {
+                this: "console",
+                method: "log",
+                args: "'onPlaySpoken' event was fired!"
+            }
+        }
+    });
 });
 
 </script>

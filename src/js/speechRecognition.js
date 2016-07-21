@@ -31,21 +31,23 @@ floe.speechRecognition.initSpeechRecognition = function (that) {
 
     recognition.onstart = function() {
         that.events.onSpeechRecognitionStart.fire(that);
-    }
+    };
 
     recognition.onresult = function(event) {
         that.events.onSpeechRecognitionResult.fire(that, event);
-    }
+    };
 
     recognition.onerror = function(event) {
         that.events.onSpeechRecognitionError.fire(that, event);
-    }
+    };
 
     recognition.onend = function() {
         that.events.onSpeechRecognitionEnd.fire(that);
-    }
+    };
 
-    recognition.start();
+    that.recognition = recognition;
+
+    that.recognition.start();
 };
 
 fluid.defaults("floe.speechRecognitionConsoleLogger", {
@@ -72,7 +74,7 @@ fluid.defaults("floe.speechRecognitionConsoleLogger", {
 
 floe.speechRecognitionConsoleLogger.logEventArgsToConsole = function(eventName, eventArguments) {
     console.log(eventName, eventArguments);
-}
+};
 
 fluid.defaults("floe.speechRecognitionPageLogger", {
     gradeNames: ["floe.speechRecognitionConsoleLogger", "fluid.viewComponent"],
@@ -102,7 +104,36 @@ floe.speechRecognitionPageLogger.logResultToPage = function(that, event) {
     fluid.each(event.results, function (result) {
         if(result[0]) {
             transcript = transcript + result[0].transcript;
-            that.applier.change("transcript", transcript)
+            that.applier.change("transcript", transcript);
         }
     });
-}
+};
+
+fluid.defaults("floe.speechRecognitionEventController", {
+    gradeNames: ["floe.speechRecognition"],
+    listeners: {
+        "onSpeechRecognitionResult.testForSpeechToEvent": {
+            funcName: "floe.speechRecognitionEventController.testForSpeechToEvent"
+        }
+        // "onPlaySpoken.log": {
+        //     this: "console",
+        //     method: "log",
+        //     args: "'onPlaySpoken' event was fired!"
+        // }
+    },
+    // A key-value list of strings to be recognized when spoken and
+    // their corresponding events to fire
+    speechToEvents: {
+        // "play": "{that}.events.onPlaySpoken"
+    }
+
+});
+
+
+floe.speechRecognitionEventController.testForSpeechToEvent = function (that, event) {
+    var spoken = event.results[0][0].transcript.toLowerCase();
+    var matchedEvent = fluid.get(that.options.speechToEvents, spoken);
+    if(matchedEvent) {
+        matchedEvent.fire();
+    }
+};
