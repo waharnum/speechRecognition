@@ -17,6 +17,7 @@
 $(document).ready(function () {
     // var pageLogger = floe.speechRecognitionPageLogger(".floe-speechLog");
     var speechController = floe.speechRecognitionEventController({
+        gradeNames: ["floe.speechRecognitionConsoleLogger"],
         events: {
             onPlaySpoken: null
         },
